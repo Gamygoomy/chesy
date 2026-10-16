@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f5e"><title>Chessy: learn and play chess</title>
+<style>
+:root{--bg:#eceff3;--ink:#1b2430;--mut:#5b6877;--card:#fff;--line:#cfd7e0;--ac:#2f6f5e;--lt:#dfe7ee;--dk:#7d96ad;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#11161c;--ink:#e8edf2;--mut:#9aa8b6;--card:#1a222b;--line:#2b3743;--ac:#58b79d;--lt:#c9d4de;--dk:#62798f;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#11161c;--ink:#e8edf2;--mut:#9aa8b6;--card:#1a222b;--line:#2b3743;--ac:#58b79d;--lt:#c9d4de;--dk:#62798f;color-scheme:dark}
+[hidden]{display:none!important}*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 40px}
+h1,h2,.big{font-family:"Iowan Old Style",Georgia,"Times New Roman",serif;font-weight:700;margin:0}
+h1{font-size:2.2rem;letter-spacing:-.5px}.sub{color:var(--mut);margin:2px 0 14px}
+nav{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:22px}
+nav button{font:inherit;font-weight:600;background:none;border:0;border-bottom:3px solid transparent;padding:8px 2px;color:var(--mut);cursor:pointer}
+nav button.on{color:var(--ink);border-color:var(--ac)}
+.two{display:grid;grid-template-columns:minmax(0,560px) 1fr;gap:28px;align-items:start}
+@media(max-width:820px){.two{grid-template-columns:minmax(0,1fr)}}
+.bd{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:100%;aspect-ratio:1;container-type:inline-size;border-radius:6px;overflow:hidden;user-select:none;touch-action:manipulation;box-shadow:0 0 0 1px var(--line)}
+.sq{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10.5cqw;line-height:1;cursor:pointer}
+.l{background:var(--lt)}.d{background:var(--dk)}
+.lm{background-image:linear-gradient(#f4d35e77,#f4d35e77)}.sel{box-shadow:inset 0 0 0 .7cqw #e9b824}
+.ht{box-shadow:inset 0 0 0 .7cqw #2f9e6e}.ck{background-image:radial-gradient(#e5484d,#e5484d00 75%)}
+.pc.w{color:#fff;-webkit-text-stroke:.4cqw #1b2430;paint-order:stroke fill}.pc.b{color:#1b2430}
+.mv{position:absolute;width:30%;height:30%;border-radius:50%;background:#1b243060;pointer-events:none}
+.mv.cp{width:90%;height:90%;background:none;border:.8cqw solid #1b243060}
+.rk,.fl{position:absolute;font-size:2cqw;font-weight:700;color:var(--ink);opacity:.55}.rk{top:.4cqw;left:.6cqw}.fl{bottom:.2cqw;right:.6cqw}
+.ld{position:absolute;border-radius:50%;pointer-events:none;background:#e9a400;box-shadow:0 0 0 .4cqw #fff9}.ld.b{background:#7a4fd6}.ld.ct{width:3.4cqw;height:3.4cqw}.ld.cr{width:2.6cqw;height:2.6cqw;top:1cqw;right:1cqw}
+.td i{display:inline-block;width:.35em;height:.35em;margin-left:.2em;border-radius:50%;background:currentColor;animation:bl 1s infinite}.td i:nth-child(2){animation-delay:.2s}.td i:nth-child(3){animation-delay:.4s}@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}@media(prefers-reduced-motion:reduce){.td i{animation:none}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+.big{font-size:1.5rem;margin-bottom:12px;min-height:2em}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mut);gap:3px}
+select,.btn{font:inherit;padding:8px 12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px}
+.btn{cursor:pointer;background:var(--card)}.btn.p{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
+.btn:focus-visible,select:focus-visible,nav button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.mvs{display:grid;grid-template-columns:2.4em 1fr 1fr;gap:2px 8px;max-height:220px;overflow:auto;font-variant-numeric:tabular-nums;margin-top:8px}
+.mvs span:nth-child(3n+1){color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{font:inherit;padding:7px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.lead{font-size:1.05rem;max-width:60ch}.msg{font-weight:600;min-height:1.6em;margin:12px 0}
+*{-webkit-tap-highlight-color:transparent}
+@media(max-width:820px){
+.wrap{padding:10px 12px 28px}h1{font-size:1.6rem}.sub{display:none}nav{margin-bottom:12px}
+.two{gap:10px}.panel{display:contents}
+.big{font-size:1.1rem;min-height:1.6em;margin:0}
+#st{order:0}#pb,#lb{order:1;width:min(100%,calc(100dvh - 210px));margin-inline:auto}
+#mv{order:2;display:flex;gap:4px 12px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;max-height:none;margin:0;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:8px;min-height:2.6em}
+#mv span{flex:none}
+#o2{order:3;margin:0}#o1{order:4;margin:0}
+#lt{order:0;margin:0}#lg{order:2;margin:0}#lx{order:3;margin:0}#o3{order:4;margin:0}
+}
+label.ck{flex-direction:row;align-items:center;gap:8px;font-size:.9rem;margin:6px 0}
+.ri{display:flex;align-items:center;gap:10px;padding:7px 4px;border-top:1px solid var(--line)}.ri .n{flex:1;font-variant-numeric:tabular-nums}.ri.on{background:var(--bg);font-weight:700}
+.cl{font-weight:600;font-size:.9rem}.cl.g{color:#2f9e6e}.cl.i{color:#c98a00}.cl.m{color:#d9601a}.cl.b{color:#d03b3b}
+#rc{font-weight:400;min-height:5.5em}#rl{margin-top:10px}
+@media(max-width:820px){#rt{order:0;margin:0}#rb{order:1;width:min(100%,calc(100dvh - 210px));margin-inline:auto}#rc{order:2;margin:0;min-height:6em}#r1{order:3;margin:0}#rtv{order:4;margin:0}#rp{order:5;margin:0}#rl{order:6;margin:0}}
+:root[data-bt=forest]{--lt:#e6ecce;--dk:#6b8f5a}:root[data-bt=sunset]{--lt:#f6dcc0;--dk:#c9825b}:root[data-bt=midnight]{--lt:#a9b8dc;--dk:#3f4f86}:root[data-bt=rose]{--lt:#f6e2e8;--dk:#c07890}
+body{background:linear-gradient(160deg,var(--bg),color-mix(in srgb,var(--dk) 28%,var(--bg))) fixed}
+h1{background:linear-gradient(90deg,var(--ink),var(--dk));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pc{filter:drop-shadow(0 .3cqw .3cqw #0003)}.nc .rk,.nc .fl{display:none}
+#gear{margin-left:auto;font-size:1.2rem}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);width:min(420px,92vw);padding:18px}dialog::backdrop{background:#0008}dialog label{margin:8px 0}dialog h2{margin-bottom:8px}dialog input[type=range]{width:100%}
+.sw{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}.swb{font:inherit;font-size:.8rem;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}.swb i{width:44px;height:44px;border-radius:6px;background:linear-gradient(135deg,var(--a) 50%,var(--b) 50%)}.swb.on{border-color:var(--ac)}
+.cf{position:fixed;top:-14px;width:9px;height:14px;z-index:99;pointer-events:none;animation:cfall linear forwards}@keyframes cfall{to{transform:translateY(105vh) rotate(720deg)}}@media(prefers-reduced-motion:reduce){.cf{display:none}}
+#bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:16px;font-size:.88rem}
+#bar .sw{margin:0;gap:6px}#bar label{margin:0}#bar b{color:var(--mut);font-weight:600}
+.swb{font-size:0;padding:3px}.swb i{width:30px;height:30px}
+.vb{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.vb select{max-width:150px;padding:5px 8px}.vb input[type=range]{width:84px}.vb .btn{padding:5px 10px}
+.tip{color:var(--mut);font-size:.9rem;margin:12px 0 0}.ft{text-align:center;color:var(--mut);font-size:.85rem;margin-top:28px}
+@media(max-width:820px){#pb,#lb,#rb{width:max(min(100%,calc(100dvh - 330px)),280px)}.tip{order:6;margin:0}}
+.cap{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:.85rem;color:var(--mut);margin:-4px 0 10px}.cap b{font-weight:400;color:var(--ink);letter-spacing:1px}
+@media(max-width:820px){#cap{order:0;margin:0}}
+</style></head><body><div class="wrap">
+<h1>♞&#xFE0E; Chessy</h1><p class="sub">Learn chess one idea at a time, then play it.</p>
+<nav><button data-t="play" class="on">Play</button><button data-t="learn">Learn</button><button data-t="review">Review</button></nav>
+<div id="bar"><b>Board</b><div class="sw" id="sw"></div>
+<label class="ck"><input type="checkbox" id="ssn"> Sound</label><label class="ck"><input type="checkbox" id="scf"> Confetti</label><label class="ck"><input type="checkbox" id="sco"> Coordinates</label>
+<label class="ck">Look <select id="sap"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+<div class="vb"><b>Teacher voice</b><select id="svo" aria-label="Voice"></select><label class="ck">Speed <input type="range" id="srt" min=".7" max="1.3" step=".05"></label><label class="ck">Pitch <input type="range" id="spt" min=".7" max="1.4" step=".05"></label><button class="btn" id="stv">Test</button></div></div>
+
+<section id="play" class="two">
+<div id="pb" class="bd" aria-label="Chess board"></div>
+<div class="panel"><div id="st" class="big"></div><div id="cap" class="cap"></div>
+<div class="row" id="o1">
+<label>Opponent<select id="lv"><option value="0">Beginner (random)</option><option value="1" selected>Casual</option><option value="2">Strong</option><option value="-1">Two players</option></select></label>
+<label>You play<select id="me"><option value="w">White</option><option value="b">Black</option></select></label></div>
+<div class="row" id="o2"><button class="btn p" id="ng">New game</button><button class="btn" id="un">Undo</button><button class="btn" id="hi">Hint</button><button class="btn" id="fl">Flip board</button><button class="btn" id="rv">Review with teacher</button></div>
+<div class="mvs" id="mv"></div><p class="tip">Tap a piece, then tap a dot to move. Stuck? Press Hint. When the game ends, tap Review with teacher.</p></div>
+</section>
+
+<section id="learn" hidden>
+<div class="chips" id="chips"></div>
+<div class="two"><div class="panel"><h2 id="lt"></h2><p class="lead" id="lx"></p><div class="msg" id="lg"></div>
+<div class="row" id="o3"><button class="btn" id="rs">Reset position</button><button class="btn" id="ls">🔊 Listen</button><button class="btn p" id="nx">Next lesson</button></div></div>
+<div id="lb" class="bd" aria-label="Lesson board"></div></div>
+</section>
+
+<section id="review" hidden><div class="two"><div class="panel"><h2 id="rt">Game review</h2><p class="lead" id="rp">Finish a game, then tap Review with teacher on the Play tab.</p><div class="msg" id="rc"></div><div class="row" id="r1"><button class="btn" id="rpv">Previous</button><button class="btn p" id="rnx">Next move</button><button class="btn" id="rls">🔊 Listen</button><button class="btn" id="ral" hidden>Show teacher's move</button></div><label class="ck" id="rtv"><input type="checkbox" id="tv" checked> Teacher speaks automatically</label><div id="rl"></div></div><div id="rb" class="bd" aria-label="Review board"></div></div></section>
+<p class="ft">Chessy · learn, play and improve at chess ♞</p>
+</div>
+<script>
+const $=i=>document.getElementById(i),START='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -';
+const D=[[1,0],[-1,0],[0,1],[0,-1]],G=[[1,1],[1,-1],[-1,1],[-1,-1]],N=[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]],V={P:100,N:320,B:330,R:500,Q:900,K:0};
+function fen(f){const[p,t,c]=f.split(' ');const b=[];for(const ch of p.replace(/\//g,''))if(+ch)for(let k=0;k<+ch;k++)b.push(null);else b.push((ch==ch.toUpperCase()?'w':'b')+ch.toUpperCase());return{b,turn:t||'w',cast:{wK:c.includes('K'),wQ:c.includes('Q'),bK:c.includes('k'),bQ:c.includes('q')},ep:-1}}
+function att(s,sq,c){const b=s.b,o=c=='w'?'b':'w',r=sq>>3,f=sq&7;
+ const at=(r2,f2,ts)=>{if(r2<0||r2>7||f2<0||f2>7)return 0;const q=b[r2*8+f2];return q&&q[0]==o&&ts.includes(q[1])};
+ const pd=c=='w'?-1:1;if(at(r+pd,f-1,'P')||at(r+pd,f+1,'P'))return 1;
+ for(const[a,e]of N)if(at(r+a,f+e,'N'))return 1;
+ for(const[a,e]of[...D,...G])if(at(r+a,f+e,'K'))return 1;
+ for(const[ds,ts]of[[D,'RQ'],[G,'BQ']])for(const[a,e]of ds){let k=1,r2,f2;while((r2=r+a*k)>=0&&r2<8&&(f2=f+e*k)>=0&&f2<8){const q=b[r2*8+f2];if(q){if(q[0]==o&&ts.includes(q[1]))return 1;break}k++}}
+ return 0}
+function pseudo(s,c){const m=[],b=s.b;for(let i=0;i<64;i++){const p=b[i];if(!p||p[0]!=c)continue;const r=i>>3,f=i&7,t=p[1];
+ const add=(r2,f2)=>{if(r2<0||r2>7||f2<0||f2>7)return 0;const j=r2*8+f2,q=b[j];if(q&&q[0]==c)return 0;m.push({from:i,to:j});return q?0:1};
+ if(t=='P'){const d=c=='w'?-1:1,st=c=='w'?6:1,pr=c=='w'?0:7;
+  const push=(j,x)=>{if(j>>3==pr)for(const k of'QRBN')m.push({from:i,to:j,promo:k});else m.push({from:i,to:j,...x})};
+  if(r+d>=0&&r+d<8){const j=(r+d)*8+f;if(!b[j]){push(j);if(r==st&&!b[j+d*8])m.push({from:i,to:j+d*8,dbl:1})}
+   for(const df of[-1,1]){const f2=f+df;if(f2<0||f2>7)continue;const j2=(r+d)*8+f2,q=b[j2];if(q&&q[0]!=c)push(j2);else if(j2==s.ep)push(j2,{ep:1})}}
+ }else if(t=='N')for(const[a,e]of N)add(r+a,f+e);
+ else if(t=='K'){for(const[a,e]of[...D,...G])add(r+a,f+e);const w=c=='w'?7:0,h=w*8;
+  if(i==h+4){if(s.cast[c+'K']&&!b[h+5]&&!b[h+6]&&b[h+7]==c+'R'&&!att(s,h+4,c)&&!att(s,h+5,c)&&!att(s,h+6,c))m.push({from:i,to:h+6,cs:'K'});
+   if(s.cast[c+'Q']&&!b[h+3]&&!b[h+2]&&!b[h+1]&&b[h]==c+'R'&&!att(s,h+4,c)&&!att(s,h+3,c)&&!att(s,h+2,c))m.push({from:i,to:h+2,cs:'Q'})}
+ }else{const ds=t=='R'?D:t=='B'?G:[...D,...G];for(const[a,e]of ds){let k=1;while(add(r+a*k,f+e*k))k++}}}
+ return m}
+function apply(s,m){const b=s.b.slice(),p=b[m.from],c=p[0],cast={...s.cast};b[m.to]=m.promo?c+m.promo:p;b[m.from]=null;
+ if(m.ep)b[m.to+(c=='w'?8:-8)]=null;
+ if(m.cs){const h=(m.to>>3)*8;if(m.cs=='K'){b[h+5]=b[h+7];b[h+7]=null}else{b[h+3]=b[h];b[h]=null}}
+ if(p[1]=='K')cast[c+'K']=cast[c+'Q']=false;
+ for(const q of[m.from,m.to]){if(q==0)cast.bQ=false;if(q==7)cast.bK=false;if(q==56)cast.wQ=false;if(q==63)cast.wK=false}
+ return{b,turn:c=='w'?'b':'w',cast,ep:m.dbl?(m.from+m.to)/2:-1}}
+function legal(s){const c=s.turn;return pseudo(s,c).filter(m=>{const n=apply(s,m);return!att(n,n.b.indexOf(c+'K'),c)})}
+function status(s){const ck=att(s,s.b.indexOf(s.turn+'K'),s.turn);if(!legal(s).length)return ck?'mate':'stale';return ck?'check':'ok'}
+function san(s,m,ns){const t=s.b[m.from][1],su=status(ns),x=su=='mate'?'#':su=='check'?'+':'';if(m.cs)return(m.cs=='K'?'O-O':'O-O-O')+x;
+ const cap=s.b[m.to]||m.ep,sq='abcdefgh'[m.to&7]+(8-(m.to>>3));return(t=='P'?(cap?'abcdefgh'[m.from&7]+'x':''):t+(cap?'x':''))+sq+(m.promo?'='+m.promo:'')+x}
+function ev(s){let t=0;for(let i=0;i<64;i++){const p=s.b[i];if(!p)continue;const r=i>>3,f=i&7;let v=V[p[1]];if('PNB'.includes(p[1]))v+=(7-Math.abs(2*r-7)+7-Math.abs(2*f-7))*2;if(p[1]=='P')v+=(p[0]=='w'?6-r:r-1)*6;t+=p[0]=='w'?v:-v}return s.turn=='w'?t:-t}
+function nega(s,d,a,b){const ms=legal(s);if(!ms.length)return att(s,s.b.indexOf(s.turn+'K'),s.turn)?-99999-d:0;if(!d)return ev(s);
+ ms.sort((x,y)=>(s.b[y.to]?V[s.b[y.to][1]]:0)-(s.b[x.to]?V[s.b[x.to][1]]:0));
+ for(const m of ms){const v=-nega(apply(s,m),d-1,-b,-a);if(v>=b)return b;if(v>a)a=v}return a}
+function ai(s,lv){const ms=legal(s);if(!lv)return ms[Math.random()*ms.length|0];let best=-1e9,bm=ms[0];for(const m of ms){const v=-nega(apply(s,m),lv,-1e9,1e9)+Math.random()*5;if(v>best){best=v;bm=m}}return bm}
+
+const SY={K:'♚',Q:'♛',R:'♜',B:'♝',N:'♞',P:'♟'};
+function Board(host,o){const B={s:o.s,sel:-1,last:[],hint:[],flip:false,lock:false};
+ B.draw=()=>{const lm=B.sel>=0?legal(B.s).filter(m=>m.from==B.sel):[],ck=status(B.s)!='ok'&&status(B.s)!='stale'?B.s.b.indexOf(B.s.turn+'K'):-1;let h='';
+  for(let k=0;k<64;k++){const i=B.flip?63-k:k,r=i>>3,f=i&7,p=B.s.b[i],t=lm.some(m=>m.to==i);
+   h+=`<div class="sq ${(r+f)%2?'d':'l'}${i==B.sel?' sel':''}${B.last.includes(i)?' lm':''}${B.hint.includes(i)?' ht':''}${i==ck?' ck':''}" data-i="${i}">${k%8==0?`<b class="rk">${8-r}</b>`:''}${k>>3==7?`<b class="fl">${'abcdefgh'[f]}</b>`:''}${p?`<span class="pc ${p[0]}">${SY[p[1]]}&#xFE0E;</span>`:''}${t?`<i class="mv${p?' cp':''}"></i>`:''}${B.last.includes(i)?`<i class="ld ${p?'cr':'ct'} ${B.lc||(B.s.b[B.last[1]]?B.s.b[B.last[1]][0]:'w')}"></i>`:''}</div>`}
+  host.innerHTML=h};
+ host.onclick=e=>{if(B.lock)return;const q=e.target.closest('.sq');if(!q)return;const i=+q.dataset.i;
+  const lm=B.sel>=0?legal(B.s).filter(m=>m.from==B.sel&&m.to==i):[];
+  if(lm.length){const m=lm.find(x=>x.promo=='Q')||lm[0];B.sel=-1;o.onMove(m);return}
+  const p=B.s.b[i];if(p&&o.free)B.s={...B.s,turn:p[0]};
+  B.sel=p&&o.pick(p)?i:-1;B.hint=[];B.draw()};
+ return B}
+
+// Play
+const P={s:fen(START),hist:[],moves:[],mobj:[],me:'w',lv:1,tok:0};
+const pb=Board($('pb'),{s:P.s,pick:p=>p[0]==P.s.turn&&(P.lv<0||p[0]==P.me),onMove:m=>pmove(m)});
+function pmove(m){const ns=apply(P.s,m),cp=P.s.b[m.to]||m.ep,s0=status(ns);sfx(s0=='mate'?(P.lv<0||P.s.turn==P.me?'win':'lose'):s0=='check'?'check':cp?'cap':'move');P.moves.push(san(P.s,m,ns));P.mobj.push(m);P.hist.push(P.s);P.s=pb.s=ns;pb.last=[m.from,m.to];pb.hint=[];pb.sel=-1;after()}
+function after(){const su=status(P.s),w=P.s.turn=='w'?'White':'Black',ai_=P.lv>=0&&P.s.turn!=P.me;let t;
+ if(su=='mate')t='Checkmate. '+(P.s.turn=='w'?'Black':'White')+' wins.';else if(su=='stale')t='Stalemate. The game is a draw.';
+ else t=(P.lv<0?w+' to move':ai_?'Opponent is thinking…':'Your move')+(su=='check'?'. Check!':'');
+ $('st').innerHTML=t.replace('…','<span class="td"><i></i><i></i><i></i></span>');$('rv').classList.toggle('p',su=='mate'||su=='stale');caps();if(su=='mate'&&(P.lv<0||P.s.turn!=P.me))confetti();let h='';for(let i=0;i<P.moves.length;i+=2)h+=`<span>${i/2+1}.</span><span>${P.moves[i]}</span><span>${P.moves[i+1]||''}</span>`;$('mv').innerHTML=h;$('mv').scrollTop=1e5;$('mv').scrollLeft=1e5;
+ pb.draw();if(ai_&&(su=='ok'||su=='check')){pb.lock=true;const k=++P.tok;setTimeout(()=>{if(k!=P.tok)return;const m=ai(P.s,P.lv);pb.lock=false;pmove(m)},1200+Math.random()*900)}}
+function newGame(){P.tok++;P.s=pb.s=fen(START);P.hist=[];P.moves=[];P.mobj=[];P.lv=+$('lv').value;P.me=$('me').value;pb.flip=P.lv>=0&&P.me=='b';pb.last=[];pb.hint=[];pb.sel=-1;pb.lock=false;after()}
+$('ng').onclick=newGame;$('lv').onchange=$('me').onchange=newGame;
+$('un').onclick=()=>{P.tok++;do{if(!P.hist.length)break;P.s=P.hist.pop();P.moves.pop();P.mobj.pop()}while(P.lv>=0&&P.s.turn!=P.me&&P.hist.length);pb.s=P.s;pb.last=[];pb.hint=[];pb.sel=-1;pb.lock=false;after()};
+$('hi').onclick=()=>{if(pb.lock||!legal(P.s).length)return;const m=ai(P.s,2);pb.hint=[m.from,m.to];pb.draw()};
+$('fl').onclick=()=>{pb.flip=!pb.flip;pb.draw()};
+
+// Learn
+const L=[
+{t:'Meet the pieces',f:START,free:1,x:'Chess is played on 64 squares by two armies. Tap any piece to see where it can go: dots are quiet moves and rings are captures. The king can step one square in any direction and must never be left in danger. The queen is the strongest piece, the rook moves in straight lines, the bishop on diagonals, the knight jumps in an L shape, and pawns march forward.'},
+{t:'Pawns and promotion',f:'8/P6k/8/8/8/8/8/K7 w - -',g:m=>m.promo,ok:'Promoted! A pawn that reaches the far rank becomes a queen, rook, bishop or knight. Pawns also capture diagonally, move two squares on their first move, and can capture "en passant" a pawn that just jumped past them.',x:'Pawns move forward one square but capture diagonally. When one reaches the far side of the board it promotes into a stronger piece, usually a queen. Your challenge: push the pawn on a7 to the last rank.'},
+{t:'Castling',f:'4k3/8/8/8/8/8/PPPPPPPP/R3K2R w KQ -',g:m=>m.cs,ok:'Castled! The king moved two squares toward the rook and the rook jumped over it. It tucks your king away and wakes up a rook in one move.',x:'Castling is the only move where two pieces move at once. It is allowed if neither piece has moved, the squares between them are empty, and the king is not in check or crossing an attacked square. Your challenge: castle on either side by moving the king two squares.'},
+{t:'Check and checkmate',f:'6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - -',g:(m,ns)=>status(ns)=='mate',ok:'Checkmate! The king is attacked and has no escape. This pattern is called a back-rank mate because the black pawns block their own king.',x:'A king under attack is in check and must escape on the next move. If it cannot, that is checkmate and the game is over. Your challenge: find the move that checkmates Black in one.'},
+{t:'Mate with the queen',f:'7k/5Q2/6K1/8/8/8/8/8 w - -',g:(m,ns)=>status(ns)=='mate',ok:'Checkmate! The queen attacks the king while your own king guards the queen, so it cannot be captured. Careful: some queen moves here cause stalemate, which is a draw.',x:'The queen and king can work together to trap a lone king. Your challenge: checkmate Black in one move. Watch out, the black king must still have a check to answer, otherwise the game is a stalemate.'},
+{t:'Opening ideas',f:START,g:(m,ns,o)=>o.b[m.from]=='wP'&&(m.to==36||m.to==35),ok:'A strong start. A pawn in the center claims space and frees your bishop and queen. Next, bring out your knights and bishops, castle early, and avoid moving the same piece twice without a reason.',x:'Good openings follow three ideas: control the center, develop your knights and bishops, and get your king to safety by castling. Your challenge: open with a center pawn by playing e2 to e4 or d2 to d4.'}];
+let li=0;const done=new Set();
+const lb=Board($('lb'),{s:fen(START),get free(){return L[li].free},pick:p=>L[li].free||p[0]=='w',onMove:m=>{const q=L[li];if(q.free){lb.draw();return}
+ const old=lb.s,ns=apply(old,m);lb.s=ns;lb.last=[m.from,m.to];lb.lock=true;lb.draw();
+ if(q.g(m,ns,old)){done.add(li);$('lg').textContent=q.ok;say(q.ok);sfx('win');confetti();chips()}else{$('lg').textContent='Not quite. Try again.';setTimeout(()=>lesson(li),1100)}}});
+function chips(){$('chips').innerHTML=L.map((q,i)=>`<button class="chip${i==li?' on':''}" data-i="${i}">${done.has(i)?'✓ ':''}${q.t}</button>`).join('');$('nx').hidden=li>=L.length-1}
+function lesson(n){if(SS)SS.cancel();li=n;const q=L[n];$('lt').textContent=q.t;$('lx').textContent=q.x||L[0].x;$('lg').textContent=q.free?'Tap a piece to see its moves.':'Your turn as White.';
+ lb.s=fen(q.f);lb.last=[];lb.sel=-1;lb.lock=false;lb.draw();chips()}
+$('chips').onclick=e=>{const c=e.target.closest('.chip');if(c)lesson(+c.dataset.i)};
+$('rs').onclick=()=>lesson(li);$('ls').onclick=()=>say(L[li].t+'. '+(L[li].x||L[0].x));$('nx').onclick=()=>lesson(li+1);
+const SS=window.speechSynthesis,NM={P:'pawn',N:'knight',B:'bishop',R:'rook',Q:'queen',K:'king'},sqn=i=>'abcdefgh'[i&7]+(8-(i>>3)),dsc=(s,m)=>NM[s.b[m.from][1]]+' from '+sqn(m.from)+' to '+sqn(m.to);
+function say(t){if(!SS)return;SS.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=S.rate;u.pitch=S.pt;const vs=SS.getVoices(),v=vs.find(v=>v.name==S.vn)||vs.find(v=>/^en/i.test(v.lang));if(v)u.voice=v;SS.speak(u)}
+function show(t){if(SS)SS.cancel();for(const b of document.querySelectorAll('nav button'))b.classList.toggle('on',b.dataset.t==t);for(const id of['play','learn','review'])$(id).hidden=id!=t}
+const R={items:[],cur:-1,key:'',alt:false,tok:0},rb=Board($('rb'),{s:fen(START),pick:()=>false,onMove(){}});rb.lock=true;
+function grade(l){return l<=10?['Best move','g']:l<40?['Good','g']:l<120?['Inaccuracy','i']:l<300?['Mistake','m']:['Blunder','b']}
+function why(s,m){const ns=apply(s,m);let g=0,gm;for(const x of legal(ns)){const tg=ns.b[x.to];if(!tg)continue;const gain=V[tg[1]]-(att(apply(ns,x),x.to,ns.turn)?V[ns.b[x.from][1]]:0);if(gain>g){g=gain;gm=x}}
+ return g>=200?`the opponent's ${NM[ns.b[gm.from][1]]} can take your ${NM[ns.b[gm.to][1]]} on ${sqn(gm.to)}`:''}
+function goal(s,b,n){const su=status(apply(s,b));if(su=='mate')return 'it checkmates the king';if(s.b[b.to])return `it wins the ${NM[s.b[b.to][1]]} on ${sqn(b.to)}`;if(b.cs)return 'castling tucks your king away safely';if(b.promo)return 'it promotes your pawn';if(su=='check')return 'it attacks the king with check';
+ return n<=10&&'NBP'.includes(s.b[b.from][1])?'it develops your pieces and fights for the center':'it keeps your pieces safer and more active'}
+function note(s,m,b,c,same,n){let t=`Move ${n}. You played the ${dsc(s,m)}. `;
+ if(c=='Best move')return t+(same?'That is exactly the move I would play. Well done.':'That is just as good as my favorite move.');
+ t+={Good:'A decent move, but there was a slightly better one. ',Inaccuracy:'That is an inaccuracy. ',Mistake:'That is a mistake. ',Blunder:'That is a blunder. '}[c];
+ const w=why(s,m);if(w&&c!='Good')t+=`The problem is that ${w}. `;
+ return t+`You should have played the ${dsc(s,b)}, because ${goal(s,b,n)}.`}
+function startReview(){const key=P.moves.join()+P.lv+P.me;if(key==R.key)return;R.key=key;R.items=[];R.cur=-1;const tk=++R.tok;$('rl').innerHTML='';$('rc').textContent='';$('ral').hidden=true;rb.s=fen(START);rb.last=[];rb.hint=[];rb.flip=P.lv>=0&&P.me=='b';rb.draw();
+ const idx=P.mobj.map((m,i)=>i).filter(i=>P.lv<0||P.hist[i].turn==P.me);
+ if(!idx.length){$('rp').textContent='Play a few moves first, then come back and I will review them with you.';R.key='';return}
+ (function go(k){if(tk!=R.tok)return;if(k>=idx.length){fin();return}$('rp').textContent=`Teacher is studying your game… ${k+1} of ${idx.length}`;
+  setTimeout(()=>{if(tk!=R.tok)return;const i=idx[k],s=P.hist[i],m=P.mobj[i];let best=-1e9,bm,pl=-1e9;
+   for(const x of legal(s)){const v=-nega(apply(s,x),2,-1e9,1e9);if(v>best){best=v;bm=x}if(x.from==m.from&&x.to==m.to&&x.promo==m.promo)pl=v}
+   const same=bm.from==m.from&&bm.to==m.to&&bm.promo==m.promo,l=Math.max(0,best-pl),[c,k2]=grade(l),n=(i>>1)+1;
+   R.items.push({i,m,b:bm,same,l,c,k:k2,n,san:P.moves[i],bl:s.turn=='b',text:note(s,m,bm,c,same,n)});go(k+1)},20)})(0)}
+function fin(){const it=R.items,cnt=k=>it.filter(x=>x.k==k).length,w=it.reduce((a,x)=>x.l>a.l?x:a,it[0]);
+ $('rl').innerHTML=it.map((x,k)=>`<div class="ri" id="ri${k}"><span class="n">${x.n}${x.bl?'...':'.'} ${x.san}</span><span class="cl ${x.k}">${x.c}</span><button class="btn" data-k="${k}">See</button></div>`).join('');
+ $('rp').textContent=`You made ${it.length} moves: ${cnt('g')} good or best, ${cnt('i')} inaccuracies, ${cnt('m')} mistakes and ${cnt('b')} blunders. `+(w.l>=120?`The biggest turning point was move ${w.n}. `:'A very clean game. ')+'Tap See on any move. Dots show what you played and the green square shows my move.'}
+function see(k){const x=R.items[k];if(!x)return;R.cur=k;R.alt=false;const s=P.hist[x.i];rb.s=s;rb.lc=s.turn;rb.last=[x.m.from,x.m.to];rb.hint=x.same?[]:[x.b.from,x.b.to];rb.sel=-1;rb.draw();$('rc').textContent=x.text;$('ral').hidden=x.same;$('ral').textContent="Show teacher's move";
+ for(const e of document.querySelectorAll('.ri'))e.classList.toggle('on',e.id=='ri'+k);$('rt').scrollIntoView({behavior:'smooth',block:'start'});if($('tv').checked)say(x.text)}
+$('rl').onclick=e=>{const b=e.target.closest('button');if(b)see(+b.dataset.k)};
+$('rnx').onclick=()=>see(Math.min(R.cur+1,R.items.length-1));$('rpv').onclick=()=>see(Math.max(R.cur-1,0));
+$('rls').onclick=()=>say(R.cur>=0?R.items[R.cur].text:$('rp').textContent);
+$('ral').onclick=()=>{const x=R.items[R.cur];if(!x)return;R.alt=!R.alt;const s=P.hist[x.i];if(R.alt){rb.s=apply(s,x.b);rb.last=[x.b.from,x.b.to];rb.hint=[]}else{rb.s=s;rb.last=[x.m.from,x.m.to];rb.hint=[x.b.from,x.b.to]}rb.draw();$('ral').textContent=R.alt?'Back to the position':"Show teacher's move"};
+$('rv').onclick=()=>{show('review');startReview()};
+if(!SS){$('ls').hidden=1;$('rls').hidden=1}
+document.querySelector('nav').onclick=e=>{const t=e.target.dataset.t;if(!t)return;show(t);if(t=='review')startReview()};
+const BT={classic:['#dfe7ee','#7d96ad','Slate'],forest:['#e6ecce','#6b8f5a','Forest'],sunset:['#f6dcc0','#c9825b','Sunset'],midnight:['#a9b8dc','#3f4f86','Midnight'],rose:['#f6e2e8','#c07890','Rose']};
+let S={bt:'classic',sn:1,cf:1,co:1,ap:'auto',vn:'',rate:.95,pt:1},AC;try{Object.assign(S,JSON.parse(localStorage.getItem('tempo')||'{}'))}catch(e){}
+function save(){try{localStorage.setItem('tempo',JSON.stringify(S))}catch(e){}}
+function tone(f,d,t=0,ty='sine',v=.12){const a=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime+t;a.type=ty;a.frequency.value=f;g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);a.connect(g);g.connect(AC.destination);a.start(n);a.stop(n+d)}
+function sfx(k){if(!S.sn)return;if(navigator.vibrate)navigator.vibrate(k=='move'?8:25);try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();
+ if(k=='move')tone(520,.07,0,'triangle');else if(k=='cap'){tone(220,.12,0,'square',.08);tone(160,.14,.04,'triangle')}else if(k=='check'){tone(660,.1);tone(880,.16,.1)}
+ else if(k=='win')[523,659,784,1047].forEach((f,i)=>tone(f,.25,i*.12,'triangle'));else if(k=='lose')[392,330,262].forEach((f,i)=>tone(f,.3,i*.18,'triangle'))}catch(e){}}
+function confetti(){if(!S.cf)return;const cs=['#e9a400','#7a4fd6','#2f9e6e','#d03b3b','#3b82f6'];for(let i=0;i<70;i++){const e=document.createElement('i');e.className='cf';e.style.cssText=`left:${Math.random()*100}vw;background:${cs[i%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.6}s;border-radius:${i%3?'2px':'50%'}`;document.body.appendChild(e);setTimeout(()=>e.remove(),5500)}}
+function applyS(){const r=document.documentElement;r.dataset.bt=S.bt;if(S.ap=='auto')delete r.dataset.theme;else r.dataset.theme=S.ap;document.body.classList.toggle('nc',!S.co);
+ $('sw').innerHTML=Object.entries(BT).map(([k,v])=>`<button class="swb${k==S.bt?' on':''}" data-k="${k}" title="${v[2]}" aria-label="${v[2]} board" style="--a:${v[0]};--b:${v[1]}"><i></i>${v[2]}</button>`).join('');
+ $('sap').value=S.ap;$('ssn').checked=!!S.sn;$('scf').checked=!!S.cf;$('sco').checked=!!S.co;$('srt').value=S.rate;$('spt').value=S.pt}
+$('sw').onclick=e=>{const b=e.target.closest('.swb');if(b){S.bt=b.dataset.k;save();applyS();sfx('move')}};
+$('sap').onchange=()=>{S.ap=$('sap').value;save();applyS()};
+$('ssn').onchange=()=>{S.sn=$('ssn').checked?1:0;save()};$('scf').onchange=()=>{S.cf=$('scf').checked?1:0;save()};$('sco').onchange=()=>{S.co=$('sco').checked?1:0;save();applyS()};
+$('srt').oninput=()=>{S.rate=+$('srt').value;save()};$('spt').oninput=()=>{S.pt=+$('spt').value;save()};$('svo').onchange=()=>{S.vn=$('svo').value;save()};
+$('stv').onclick=()=>say('Hello! I am your chess teacher. Let us learn and play together.');
+function fillV(){const vs=SS.getVoices().filter(v=>/^en/i.test(v.lang));$('svo').innerHTML='<option value="">Default</option>'+vs.map(v=>`<option value="${v.name}"${v.name==S.vn?' selected':''}>${v.name}</option>`).join('')}
+if(SS){fillV();SS.onvoiceschanged=fillV}else for(const i of['svo','srt','spt','stv'])$(i).disabled=true;
+
+function caps(){const n={w:{},b:{}};for(const p of fen(START).b)if(p)n[p[0]][p[1]]=(n[p[0]][p[1]]||0)+1;for(const p of P.s.b)if(p)n[p[0]][p[1]]--;
+ let a=0,t={w:'',b:''};for(const c of'wb')for(const k of'QRBNP'){const q=n[c][k];t[c=='w'?'b':'w']+=(SY[k]+'\uFE0E').repeat(q);a+=(c=='b'?1:-1)*q*V[k]}
+ $('cap').innerHTML=`<span>White took <b>${t.w||'-'}</b></span><span>Black took <b>${t.b||'-'}</b></span><span>${a?(a>0?'White':'Black')+' +'+Math.abs(a)/100:'Even material'}</span>`}
+applyS();
+lesson(0);newGame();
+</script></body></html>
